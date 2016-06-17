@@ -1,0 +1,155 @@
+
+version: '2'
+#########################################
+#
+## Required infrastructure on each host
+#
+# - Consul Servers
+# - Registrators
+#
+#########################################
+
+services:
+
+###### Consul Servers
+
+    consul-server0:
+        image: progrium/consul
+        container_name: consul-server0
+        ports:
+            - 8300:8300
+            - 8301:8301
+            - 8301:8301/udp
+            - 8302:8302
+            - 8302:8302/udp
+            - 8400:8400
+            - 8500:8500
+            - 53:53/udp
+        environment:
+        - "constraint:node==ucp-manager
+        command: -ui-dir /ui -server -advertise 10.0.100.10 -bootstrap-expect 3
+        networks:
+            consul-net:
+                aliases:
+                    - consul-server0
+        restart: always
+    consul-server1:
+        image: progrium/consul
+        container_name: consul-server1
+        ports:
+            - 8300:8300
+            - 8301:8301
+            - 8301:8301/udp
+            - 8302:8302
+            - 8302:8302/udp
+            - 8400:8400
+            - 8500:8500
+            - 53:53/udp
+        environment:
+            - "constraint:node==ucp-replica1
+        command: -ui-dir /ui -server -join 10.0.100.10 -advertise 10.0.100.11
+        networks:
+            consul-net:
+                aliases:
+                    - consul-server1
+        restart: always
+    consul-server2:
+        image: progrium/consul
+        container_name: consul-server2
+        ports:
+            - 8300:8300
+            - 8301:8301
+            - 8301:8301/udp
+            - 8302:8302
+            - 8302:8302/udp
+            - 8400:8400
+            - 8500:8500
+            - 53:53/udp
+        environment:
+            - "constraint:node==ucp-replica2
+        command: -ui-dir /ui -server -join 10.0.100.10 -advertise 10.0.100.12
+        networks:
+           consul-net:
+                aliases:
+                    - consul-server2
+        restart: always
+
+    consul-server3:
+        image: progrium/consul
+        container_name: consul-server3
+        ports:
+            - 8300:8300
+            - 8301:8301
+            - 8301:8301/udp
+            - 8302:8302
+            - 8302:8302/udp
+            - 8400:8400
+            - 8500:8500
+            - 53:53/udp
+        environment:
+            - "constraint:node==ucp-node1
+        command: -ui-dir /ui -server -join 10.0.100.10 -advertise 10.0.100.13
+        networks:
+           consul-net:
+                aliases:
+                    - consul-server3
+
+#### Registrators
+
+    registrator0:
+        image: gliderlabs/registrator:latest
+        container_name: registrator0
+        environment:
+            - "constraint:node==ucp-manager
+        command: consul://10.0.100.10:8500
+        networks:
+            consul-net:
+                aliases:
+                    - registrator0
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock
+        restart: always
+
+    registrator1:
+        image: gliderlabs/registrator:latest
+        container_name: registrator1
+        environment:
+            - "constraint:node==ucp-replica1
+        command: consul://10.0.100.11:8500
+        networks:
+            consul-net:
+                aliases:
+                    - registrator1
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock
+        restart: always
+    registrator2:
+        image: gliderlabs/registrator:latest
+        container_name: registrator2
+        environment:
+            - "constraint:node==upc-replica2
+        command: consul://10.0.100.12:8500
+        networks:
+            consul-net:
+                aliases:
+                    - registrator2
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock
+        restart: always
+    registrator3:
+        image: gliderlabs/registrator:latest
+        container_name: registrator3
+        environment:
+            - "constraint:node==ucp-node1
+        command: consul://10.0.100.13:8500
+        networks:
+            consul-net:
+                aliases:
+                    - registrator3
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock
+        restart: always
+
+networks:
+    consul-net:
+
