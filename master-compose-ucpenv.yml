@@ -60,6 +60,10 @@ services:
           - constraint:node==ucp-manager
         command: consul://ucp-manager.dockerlab.local:8500
 #        network_mode: "container:consul-master"
+        dns:
+          - 10.0.100.10
+          - 10.0.100.11
+          - 10.0.100.12
         networks:
             infrastructure-net:
                 aliases:
