@@ -1,0 +1,75 @@
+version: '2'
+services:
+
+#10.0.100.10 ucp-manager
+#10.0.100.11 ucp-replica1
+#10.0.100.12 ucp-replica2
+#10.0.100.13 ucp-node1
+#10.0.100.14 ucp-node2
+
+    dns-master:
+        image: frjaraur/docker-simple-unbound
+        container_name: dns-master
+        ports:
+          - 8853:53/udp
+        environment:
+          - constraint:node==ucp-manager
+          - DNSENTRIES=ucp-manager.dockerlab.local@10.0.100.10 ucp-replica1.dockerlab.local@10.0.100.11 ucp-replica2.dockerlab.local@10.0.100.12
+        dns:
+          - 10.0.100.10
+          - 10.0.100.11
+          - 10.0.100.12
+        networks:
+            infrastructure-net:
+                aliases:
+                    - dns-master
+        restart: always
+        labels:
+          infrastructure.role: "dns-master"
+
+    consul-master:
+        image: consul
+        container_name: consul-master
+        depends_on:
+          - dns-master
+        environment:
+          - CONSUL_BIND_INTERFACE=eth1 # For testing, should be local interface assigned to infrastructure network
+          - constraint:node==ucp-manager
+        expose:
+          - 8500
+        command: agent -server -ui-dir /ui -bootstrap-expect 3
+        dns:
+          - 10.0.100.10
+          - 10.0.100.11
+          - 10.0.100.12
+        #network_mode: "container:dns-master"
+        networks:
+            infrastructure-net:
+                aliases:
+                    - consul-master
+        restart: always
+        labels:
+          infrastructure.role: "consul-master"
+
+    registrator-master:
+        image: gliderlabs/registrator:latest
+        container_name: registrator-master
+        depends_on:
+          - consul-master
+        environment:
+          - constraint:node==ucp-manager
+        command: consul://ucp-manager.dockerlab.local:8500
+#        network_mode: "container:consul-master"
+        networks:
+            infrastructure-net:
+                aliases:
+                    - registrator-master
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock
+#        restart: always
+        labels:
+          infrastructure.role: "registrator-master"
+
+
+networks:
+    infrastructure-net:
