@@ -11,16 +11,19 @@ services:
         image: frjaraur/docker-simple-unbound
         container_name: dns-master
         ports:
-          - 53:53/udp
+          - 8853:53/udp
         environment:
-          - "constraint:node==ucp-manager"
-          - DNSENTRIES="ucp-manager.dockerlab.local@10.0.100.10 ucp-replica1.dockerlab.local@10.0.100.11 ucp-replica2.dockerlab.local@10.0.100.12"
+#          - constraint:node==ucp-manager
+          - DNSENTRIES=ucp-manager.dockerlab.local@10.0.100.10 ucp-replica1.dockerlab.local@10.0.100.11 ucp-replica2.dockerlab.local@10.0.100.12
         dns:
           - 10.0.100.10
           - 10.0.100.11
           - 10.0.100.12
-        network_mode: "host"
-        restart: always
+        networks:
+            infrastructure-net:
+                aliases:
+                    - dns-master
+#        restart: always
         labels:
           infrastructure.role: "dns-master"
 
@@ -29,16 +32,22 @@ services:
         container_name: consul-master
         depends_on:
           - dns-master
-        environment:
-          - CONSUL_BIND_INTERFACE=eth1 # For testing, should be local interface assigned to infrastructure network
-          - "constraint:node==ucp-manager"
-        command: -ui-dir /ui -server -advertise eth1 -bootstrap-expect 3
+#        environment:
+#          - CONSUL_BIND_INTERFACE=eth1 # For testing, should be local interface assigned to infrastructure network
+#          - constraint:node==ucp-manager
+        expose:
+          - 8500
+        command: agent -server -ui-dir /ui -bootstrap-expect 3
         dns:
           - 10.0.100.10
           - 10.0.100.11
           - 10.0.100.12
-        network_mode: "container:consul-master"
-        restart: always
+        #network_mode: "container:dns-master"
+        networks:
+            infrastructure-net:
+                aliases:
+                    - consul-master
+#        restart: always
         labels:
           infrastructure.role: "consul-master"
 
@@ -47,12 +56,20 @@ services:
         container_name: registrator-master
         depends_on:
           - consul-master
-        environment:
-          - "constraint:node==ucp-manager"
-        command: consul://
-        network_mode: "container:consul-master"
+#        environment:
+#          - constraint:node==ucp-manager
+        command: consul://consul-master:8500
+#        network_mode: "container:consul-master"
+        networks:
+            infrastructure-net:
+                aliases:
+                    - registrator-master
         volumes:
             - /var/run/docker.sock:/tmp/docker.sock
-        restart: always
+#        restart: always
         labels:
           infrastructure.role: "registrator-master"
+
+
+networks:
+    infrastructure-net:
