@@ -46,7 +46,7 @@ services:
             - 8500:8500
             - 53:53/udp
         environment:
-        - "constraint:node==ucp-manager
+        - "constraint:node==ucp-manager"
         command: agent -ui-dir /ui -server -advertise 10.0.100.10 -bootstrap-expect 3
         networks:
             consul-net:
@@ -66,7 +66,7 @@ services:
             - 8500:8500
             - 53:53/udp
         environment:
-            - "constraint:node==ucp-replica1
+            - "constraint:node==ucp-replica1"
         command: -ui-dir /ui -server -join 10.0.100.10 -advertise 10.0.100.11
         networks:
             consul-net:
@@ -86,7 +86,7 @@ services:
             - 8500:8500
             - 53:53/udp
         environment:
-            - "constraint:node==ucp-replica2
+            - "constraint:node==ucp-replica2"
         command: -ui-dir /ui -server -join 10.0.100.10 -advertise 10.0.100.12
         networks:
            consul-net:
@@ -101,7 +101,7 @@ services:
         image: gliderlabs/registrator:latest
         container_name: registrator0
         environment:
-            - "constraint:node==ucp-manager
+            - "constraint:node==ucp-manager"
         command: consul://10.0.100.10:8500
         networks:
             consul-net:
@@ -115,7 +115,7 @@ services:
         image: gliderlabs/registrator:latest
         container_name: registrator1
         environment:
-            - "constraint:node==ucp-replica1
+            - "constraint:node==ucp-replica1"
         command: consul://10.0.100.11:8500
         networks:
             consul-net:
@@ -128,7 +128,7 @@ services:
         image: gliderlabs/registrator:latest
         container_name: registrator2
         environment:
-            - "constraint:node==ucp-replica2
+            - "constraint:node==ucp-replica2"
         command: consul://10.0.100.12:8500
         networks:
             consul-net:
