@@ -11,7 +11,7 @@ services:
         image: frjaraur/docker-simple-unbound
         container_name: dns-master
         ports:
-          - 8853:53/udp
+          - 53:53/udp
         environment:
           - constraint:node==ucp-manager
           - DNSENTRIES=ucp-manager.dockerlab.local@10.0.100.10 ucp-replica1.dockerlab.local@10.0.100.11 ucp-replica2.dockerlab.local@10.0.100.12
@@ -35,8 +35,14 @@ services:
         environment:
           - CONSUL_BIND_INTERFACE=eth1 # For testing, should be local interface assigned to infrastructure network
           - constraint:node==ucp-manager
-        expose:
-          - 8500
+        ports:
+          - 8300:8300
+          - 8301:8301
+          - 8301:8301/udp
+          - 8302:8302
+          - 8302:8302/udp
+          - 8400:8400
+          - 8500:8500
         command: agent -server -ui-dir /ui -bootstrap-expect 3
         dns:
           - 10.0.100.10
