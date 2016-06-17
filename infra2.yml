@@ -44,7 +44,6 @@ services:
             - 8302:8302/udp
             - 8400:8400
             - 8500:8500
-            - 53:53/udp
         environment:
         - "constraint:node==ucp-manager"
         command: agent -ui-dir /ui -server -advertise 10.0.100.10 -bootstrap-expect 3
@@ -64,7 +63,6 @@ services:
             - 8302:8302/udp
             - 8400:8400
             - 8500:8500
-            - 53:53/udp
         environment:
             - "constraint:node==ucp-replica1"
         command: -ui-dir /ui -server -join 10.0.100.10 -advertise 10.0.100.11
@@ -84,7 +82,6 @@ services:
             - 8302:8302/udp
             - 8400:8400
             - 8500:8500
-            - 53:53/udp
         environment:
             - "constraint:node==ucp-replica2"
         command: -ui-dir /ui -server -join 10.0.100.10 -advertise 10.0.100.12
