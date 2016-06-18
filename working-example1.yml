@@ -2,10 +2,13 @@ version: '2'
 #########################################
 #
 ## Required infrastructure on each host
+# - DNS Server
+# - Consul Server
+# - Registrator
 #
-# - Consul Servers
-# - Registrators
-#
+# This working example uses an overlay network for all infrastructure objects, publishing only 
+# needed ports on each docker engine host (ucp-manager, ucp-replica1 and ucp-replica2)
+
 #########################################
 
 services:
