@@ -107,6 +107,8 @@ services:
 #### Registrators
 
     registrator0:
+        depends_on:
+          - consul-server0
         image: gliderlabs/registrator:latest
         container_name: registrator0
         dns:
@@ -125,6 +127,8 @@ services:
         restart: always
 
     registrator1:
+        depends_on:
+          - consul-server1
         image: gliderlabs/registrator:latest
         container_name: registrator1
         dns:
@@ -142,6 +146,8 @@ services:
             - /var/run/docker.sock:/tmp/docker.sock
         restart: always
     registrator2:
+        depends_on:
+          - consul-server2
         image: gliderlabs/registrator:latest
         container_name: registrator2
         dns:
