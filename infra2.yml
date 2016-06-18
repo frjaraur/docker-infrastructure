@@ -20,13 +20,13 @@ services:
           - 53:53/udp
         environment:
           - "constraint:node==ucp-manager"
-          - DNSENTRIES="ucp-manager.dockerlab.local@10.0.100.10 ucp-replica1.dockerlab.local@10.0.100.11 ucp-replica2.dockerlab.local@10.0.100.12"
+          - DNSENTRIES=ucp-manager.dockerlab.local@10.0.100.10 ucp-replica1.dockerlab.local@10.0.100.11 ucp-replica2.dockerlab.local@10.0.100.12
         dns:
           - 10.0.100.10
           - 10.0.100.11
           - 10.0.100.12
         networks:
-            consul-net:
+            infrastructure-net:
                 aliases:
                     - dns-server0
         restart: always
@@ -36,6 +36,10 @@ services:
     consul-server0:
         image: consul
         container_name: consul-server0
+        dns:
+          - 10.0.100.10
+          - 10.0.100.11
+          - 10.0.100.12
         ports:
             - 8300:8300
             - 8301:8301
@@ -48,13 +52,17 @@ services:
         - "constraint:node==ucp-manager"
         command: agent -ui-dir /ui -server -advertise 10.0.100.10 -bootstrap-expect 3
         networks:
-            consul-net:
+            infrastructure-net:
                 aliases:
                     - consul-server0
         restart: always
     consul-server1:
         image: progrium/consul
         container_name: consul-server1
+        dns:
+          - 10.0.100.10
+          - 10.0.100.11
+          - 10.0.100.12
         ports:
             - 8300:8300
             - 8301:8301
@@ -67,13 +75,17 @@ services:
             - "constraint:node==ucp-replica1"
         command: -ui-dir /ui -server -join 10.0.100.10 -advertise 10.0.100.11
         networks:
-            consul-net:
+            infrastructure-net:
                 aliases:
                     - consul-server1
         restart: always
     consul-server2:
         image: progrium/consul
         container_name: consul-server2
+        dns:
+          - 10.0.100.10
+          - 10.0.100.11
+          - 10.0.100.12
         ports:
             - 8300:8300
             - 8301:8301
@@ -86,7 +98,7 @@ services:
             - "constraint:node==ucp-replica2"
         command: -ui-dir /ui -server -join 10.0.100.10 -advertise 10.0.100.12
         networks:
-           consul-net:
+           infrastructure-net:
                 aliases:
                     - consul-server2
         restart: always
@@ -97,11 +109,15 @@ services:
     registrator0:
         image: gliderlabs/registrator:latest
         container_name: registrator0
+        dns:
+          - 10.0.100.10
+          - 10.0.100.11
+          - 10.0.100.12
         environment:
             - "constraint:node==ucp-manager"
         command: consul://10.0.100.10:8500
         networks:
-            consul-net:
+            infrastructure-net:
                 aliases:
                     - registrator0
         volumes:
@@ -111,11 +127,15 @@ services:
     registrator1:
         image: gliderlabs/registrator:latest
         container_name: registrator1
+        dns:
+          - 10.0.100.10
+          - 10.0.100.11
+          - 10.0.100.12
         environment:
             - "constraint:node==ucp-replica1"
         command: consul://10.0.100.11:8500
         networks:
-            consul-net:
+            infrastructure-net:
                 aliases:
                     - registrator1
         volumes:
@@ -124,11 +144,15 @@ services:
     registrator2:
         image: gliderlabs/registrator:latest
         container_name: registrator2
+        dns:
+          - 10.0.100.10
+          - 10.0.100.11
+          - 10.0.100.12
         environment:
             - "constraint:node==ucp-replica2"
         command: consul://10.0.100.12:8500
         networks:
-            consul-net:
+            infrastructure-net:
                 aliases:
                     - registrator2
         volumes:
@@ -136,5 +160,5 @@ services:
         restart: always
 
 networks:
-    consul-net:
+    infrastructure-net:
 
